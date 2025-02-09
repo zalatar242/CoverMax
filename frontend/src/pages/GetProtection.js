@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ProtectionCard from '../components/ProtectionCard';
 import { ethers } from 'ethers';
-import contracts from '../contracts.json';
+import { useContracts } from '../contexts/ContractsContext';
+import { getProvider } from '../utils/providerHelper';
 import {
   Container,
   Header,
@@ -19,6 +20,7 @@ import {
 } from '../styles/GetProtection.styles';
 
 const GetProtection = () => {
+  const contracts = useContracts();
   const [stablecoinProtection, setStablecoinProtection] = useState({
     title: "RLUSD Protection",
     risks: ["Stablecoin Depegging Risk (100% weight)", "Smart Contract Risk (0% weight)"],
@@ -36,8 +38,13 @@ const GetProtection = () => {
       return;
     }
 
+    if (!contracts) {
+      setError("Loading contracts...");
+      return;
+    }
+
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const signer = await provider.getSigner();
 
       const insurancePool = new ethers.Contract(
@@ -90,7 +97,7 @@ const GetProtection = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [contracts]); // Re-run when contracts change
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value.toLowerCase());

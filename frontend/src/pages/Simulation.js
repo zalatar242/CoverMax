@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import contracts from '../contracts.json';
+import { useContracts } from '../contexts/ContractsContext';
+import { getProvider } from '../utils/providerHelper';
 import {
   Container,
   WarningBanner,
@@ -8,6 +9,7 @@ import {
 } from '../styles/Simulation.styles';
 
 const Simulation = () => {
+  const contracts = useContracts();
   const [isLoading, setIsLoading] = useState(false);
   const [depegTimestamp, setDepegTimestamp] = useState(null);
   const [timeLeft, setTimeLeft] = useState(1);
@@ -17,16 +19,14 @@ const Simulation = () => {
     secondPhaseClaimed: false,
     secondPhaseUnlockTime: null
   });
-  const RLUSD_ADDRESS = contracts.RLUSD.address; // RLUSD testnet
-  const coverageAmount = ethers.parseEther("1000"); // 1000 RLUSD coverage
+  const RLUSD_ADDRESS = contracts?.RLUSD?.address;
 
-  // Load payout state when component mounts
   useEffect(() => {
     const loadPayoutState = async () => {
-      if (!window.ethereum) return;
+      if (!window.ethereum || !contracts) return;
 
       try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
+        const provider = await getProvider();
         const signer = await provider.getSigner();
 
         const payoutManager = new ethers.Contract(
@@ -72,7 +72,7 @@ const Simulation = () => {
     const refreshInterval = setInterval(loadPayoutState, 2000); // Refresh every 2 seconds
 
     return () => clearInterval(refreshInterval);
-  }, []);
+  }, [contracts]); // Add contracts as dependency
 
   // Check if enough time has passed since depeg
   const canTriggerPayout = depegTimestamp &&
@@ -96,11 +96,11 @@ const Simulation = () => {
   }, [depegTimestamp, canTriggerPayout]);
 
   const simulateDepeg = async () => {
-    if (!window.ethereum) return;
+    if (!window.ethereum || !contracts) return;
 
     setIsLoading(true);
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const oracle = new ethers.Contract(
         contracts.InsuranceOracle.address,
         contracts.InsuranceOracle.abi,
@@ -128,11 +128,11 @@ const Simulation = () => {
   };
 
   const triggerPayout = async () => {
-    if (!window.ethereum) return;
+    if (!window.ethereum || !contracts) return;
 
     setIsLoading(true);
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const signer = await provider.getSigner();
 
       // Get contract instances
@@ -227,9 +227,10 @@ const Simulation = () => {
              <p>⏳ Preparing second phase payout...</p>
              <SimulateButton
                onClick={async () => {
+                 if (!contracts) return;
                  setIsLoading(true);
                  try {
-                   const provider = new ethers.BrowserProvider(window.ethereum);
+                   const provider = await getProvider();
                    const signer = await provider.getSigner();
                    const payoutManager = new ethers.Contract(
                      contracts.PayoutManager.address,

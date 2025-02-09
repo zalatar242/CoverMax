@@ -4,6 +4,7 @@ import GetProtection from './pages/GetProtection';
 import ProvideProtection from './pages/ProvideProtection';
 import Simulation from './pages/Simulation';
 import { ethers } from 'ethers';
+import { ContractsProvider } from './contexts/ContractsContext';
 import {
   Container,
   Header,
@@ -33,35 +34,37 @@ const App = () => {
   };
 
   return (
-    <Router>
-      <Container>
-        <Header>
-          <Logo>CoverMax</Logo>
-          <Nav>
-            <NavLink to="/">Get Protection</NavLink>
-            <NavLink to="/provide">Provide Protection</NavLink>
-            <NavLink to="/simulation">Simulation</NavLink>
-            {account ? (
-              <div>Connected: {account.slice(0, 6)}...{account.slice(-4)}</div>
-            ) : (
-              <ConnectButton
-                onClick={connectWallet}
-                disabled={!isMetaMaskInstalled}
-                title={!isMetaMaskInstalled ? "Please install MetaMask" : ""}
-              >
-                {isMetaMaskInstalled ? "Connect Wallet" : "Install MetaMask"}
-              </ConnectButton>
-            )}
-          </Nav>
-        </Header>
+    <ContractsProvider>
+      <Router>
+        <Container>
+          <Header>
+            <Logo>CoverMax</Logo>
+            <Nav>
+              <NavLink to="/">Get Protection</NavLink>
+              <NavLink to="/provide">Provide Protection</NavLink>
+              <NavLink to="/simulation">Simulation</NavLink>
+              {account ? (
+                <div>Connected: {account.slice(0, 6)}...{account.slice(-4)}</div>
+              ) : (
+                <ConnectButton
+                  onClick={connectWallet}
+                  disabled={!isMetaMaskInstalled}
+                  title={!isMetaMaskInstalled ? "Please install MetaMask" : ""}
+                >
+                  {isMetaMaskInstalled ? "Connect Wallet" : "Install MetaMask"}
+                </ConnectButton>
+              )}
+            </Nav>
+          </Header>
 
-        <Routes>
-          <Route path="/" element={<GetProtection />} />
-          <Route path="/provide" element={<ProvideProtection />} />
-          <Route path="/simulation" element={<Simulation />} />
-        </Routes>
-      </Container>
-    </Router>
+          <Routes>
+            <Route path="/" element={<GetProtection />} />
+            <Route path="/provide" element={<ProvideProtection />} />
+            <Route path="/simulation" element={<Simulation />} />
+          </Routes>
+        </Container>
+      </Router>
+    </ContractsProvider>
   );
 };
 

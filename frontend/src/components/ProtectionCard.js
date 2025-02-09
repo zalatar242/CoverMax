@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { AccountBalanceWallet, Search, Shield } from '@mui/icons-material';
 import { ethers } from 'ethers';
-import contracts from '../contracts.json';
+import { useContracts } from '../contexts/ContractsContext';
+import { getProvider } from '../utils/providerHelper';
 
 const Card = styled.div`
   background: white;
@@ -163,6 +164,7 @@ const ProtectionCard = ({
   currentBalance,
   onUpdate
 }) => {
+  const contracts = useContracts();
   const [protectionAmount, setProtectionAmount] = useState('100');
   const [error, setError] = useState('');
   const [calculatedPremium, setCalculatedPremium] = useState(null);
@@ -174,8 +176,13 @@ const ProtectionCard = ({
   const calculateProtectionCost = async (amount) => {
     if (!amount || isNaN(amount)) return;
 
+    if (!contracts) {
+      setError('Loading contracts...');
+      return;
+    }
+
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const signer = await provider.getSigner();
       const insurancePool = new ethers.Contract(
         contracts.InsurancePool.address,
@@ -210,9 +217,14 @@ const ProtectionCard = ({
       return;
     }
 
+    if (!contracts) {
+      setError('Loading contracts...');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const signer = await provider.getSigner();
       const insurancePool = new ethers.Contract(
         contracts.InsurancePool.address,

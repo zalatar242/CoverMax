@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AccountBalanceWallet, LocalAtm, Security, Warning } from '@mui/icons-material';
 import { ethers, formatEther } from 'ethers';
-import contracts from '../contracts.json';
+import { useContracts } from '../contexts/ContractsContext';
+import { getProvider } from '../utils/providerHelper';
 import {
   Container,
   Header,
@@ -24,6 +25,7 @@ import {
 } from '../styles/ProvideProtection.styles';
 
 const ProvideProtection = () => {
+  const contracts = useContracts();
   const [riskBuckets, setRiskBuckets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -83,9 +85,14 @@ const ProvideProtection = () => {
   const handleProvideLiquidity = async (riskType) => {
     if (!window.ethereum || !amounts[riskType]) return;
 
+    if (!contracts) {
+      setError("Loading contracts...");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const signer = await provider.getSigner();
       const insurancePool = new ethers.Contract(
         contracts.InsurancePool.address,
@@ -139,8 +146,14 @@ const ProvideProtection = () => {
       return;
     }
 
+    if (!contracts) {
+      setError("Loading contracts...");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const signer = await provider.getSigner();
 
       const insurancePool = new ethers.Contract(
@@ -195,9 +208,9 @@ const ProvideProtection = () => {
 
     // Set up event listeners for relevant contract events
     const setupEventListeners = async () => {
-      if (!window.ethereum) return;
+      if (!window.ethereum || !contracts) return;
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const insurancePool = new ethers.Contract(
         contracts.InsurancePool.address,
         contracts.InsurancePool.abi,
@@ -239,9 +252,9 @@ const ProvideProtection = () => {
     // Cleanup function to remove event listeners
     return () => {
       const cleanup = async () => {
-        if (!window.ethereum) return;
+        if (!window.ethereum || !contracts) return;
 
-        const provider = new ethers.BrowserProvider(window.ethereum);
+        const provider = await getProvider();
         const insurancePool = new ethers.Contract(
           contracts.InsurancePool.address,
           contracts.InsurancePool.abi,
@@ -260,7 +273,7 @@ const ProvideProtection = () => {
 
       cleanup();
     };
-  }, []);
+  }, [contracts]); // Add contracts as dependency
 
   if (loading) {
     return (
