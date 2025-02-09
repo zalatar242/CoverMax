@@ -73,9 +73,10 @@ Premiums are calculated dynamically based on:
 
    #If and only if Deploying contracts locally
    npx hardhat node
+   npx hardhat run scripts/deploy.js --network localhost
 
    # Deploy contracts
-   npx hardhat run scripts/deploy.js
+   npx hardhat run scripts/deploy.js --network sepolia
 
    # Start frontend
    cd frontend && npm start

@@ -21,7 +21,7 @@ import {
 const GetProtection = () => {
   const [stablecoinProtection, setStablecoinProtection] = useState({
     title: "RLUSD Protection",
-    risks: ["Stablecoin Depegging Risk (50% weight)", "Smart Contract Risk (50% weight)"],
+    risks: ["Stablecoin Depegging Risk (100% weight)", "Smart Contract Risk (0% weight)"],
     costPerHundred: 0.15,
     availableProtection: "2500",
     maxProtection: "3000",
@@ -74,7 +74,7 @@ const GetProtection = () => {
 
       setStablecoinProtection({
         title: "RLUSD Protection",
-        risks: ["Stablecoin Depegging Risk (50% weight)", "Smart Contract Risk (50% weight)"],
+        risks: ["Stablecoin Depegging Risk (100% weight)", "Smart Contract Risk (0% weight)"],
         costPerHundred: parseFloat(ethers.formatEther(premium)),
         maxProtection: totalLiquidity.toString(),
         availableProtection: availableProtection.toString(),

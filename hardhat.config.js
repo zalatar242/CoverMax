@@ -1,5 +1,6 @@
 require('dotenv').config();
 require("@nomicfoundation/hardhat-toolbox");
+require("@nomiclabs/hardhat-etherscan");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -33,6 +34,9 @@ module.exports = {
       gas: 4000000,
       gasPrice: 20000000000 // 20 Gwei
     }
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY
   },
   paths: {
     sources: "./contracts",

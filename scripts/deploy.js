@@ -10,10 +10,28 @@ const SEPOLIA_FEEDS = {
 
 // Validate environment variables for Sepolia deployment
 function validateSepoliaEnv() {
-  const requiredVars = ['SEPOLIA_URL', 'PRIVATE_KEY', 'RLUSD_ADDRESS', 'UTILIZATION_FEED'];
+  const requiredVars = ['SEPOLIA_URL', 'PRIVATE_KEY', 'RLUSD_ADDRESS', 'UTILIZATION_FEED', 'ETHERSCAN_API_KEY'];
   for (const varName of requiredVars) {
     if (!process.env[varName]) {
       throw new Error(`Missing required environment variable: ${varName}`);
+    }
+  }
+}
+
+async function verifyContract(address, constructorArguments = []) {
+  console.log(`Verifying contract at ${address}...`);
+  try {
+    await hre.run("verify:verify", {
+      address: address,
+      constructorArguments: constructorArguments,
+    });
+    console.log("Contract verification successful");
+  } catch (error) {
+    if (error.message.includes("already verified")) {
+      console.log("Contract is already verified!");
+    } else {
+      console.error("Error verifying contract:", error);
+      throw error;
     }
   }
 }
@@ -69,11 +87,25 @@ async function main() {
   await oracle.deployed();
   console.log("InsuranceOracle deployed to:", oracle.address);
 
+  // Verify InsuranceOracle if on Sepolia
+  if (!isLocal) {
+    // Wait for a few block confirmations before verification
+    console.log("Waiting for block confirmations...");
+    await oracle.deployTransaction.wait(5);
+    await verifyContract(oracle.address);
+  }
+
   // Deploy PayoutManager
   const PayoutManager = await hre.ethers.getContractFactory("PayoutManager");
   const payoutManager = await PayoutManager.deploy();
   await payoutManager.deployed();
   console.log("PayoutManager deployed to:", payoutManager.address);
+
+  // Verify PayoutManager if on Sepolia
+  if (!isLocal) {
+    await payoutManager.deployTransaction.wait(5);
+    await verifyContract(payoutManager.address);
+  }
 
   let rlusd;
   if (isLocal) {
@@ -95,6 +127,12 @@ async function main() {
   const pool = await InsurancePool.deploy(rlusd.address);
   await pool.deployed();
   console.log("InsurancePool deployed to:", pool.address);
+
+  // Verify InsurancePool if on Sepolia
+  if (!isLocal) {
+    await pool.deployTransaction.wait(5);
+    await verifyContract(pool.address, [rlusd.address]);
+  }
 
   // Set up contract connections
   console.log("\nConfiguring contract connections...");
