@@ -60,6 +60,8 @@ Premiums are calculated dynamically based on:
 
 ## Development Setup
 
+> **Note**: Currently, only MetaMask wallet is supported for connecting to the application.
+
 1. Clone the repository
 2. Install dependencies:
    ```bash
@@ -67,20 +69,38 @@ Premiums are calculated dynamically based on:
    cd frontend && npm install
    ```
 3. Copy `.env.example` to `.env` and configure variables
+
+   For local development:
+
+   ```
+   NETWORK=local
+   ```
+
+   For Sepolia testnet (may not work as well):
+
+   ```
+   NETWORK=sepolia
+   ```
+
 4. Run the development environment:
 
    ```bash
-
-   #If and only if Deploying contracts locally
+   # If running locally
    npx hardhat node
    npx hardhat run scripts/deploy.js --network localhost
-
-   # Deploy contracts
-   npx hardhat run scripts/deploy.js --network sepolia
 
    # Start frontend
    cd frontend && npm start
    ```
+
+### Deployed Contracts (Sepolia)
+
+The protocol is deployed on Sepolia testnet with the following contract addresses:
+
+- InsuranceOracle: `0xB654b0FC024616802B4295095AE08DAb98DfF7c0`
+- InsurancePool: `0xFE3247FCFc20702A18505A10650C9698aCAbF20e`
+- PayoutManager: `0x80F22dA6aF639eF35345ba98AfE6a48478bDcE9E`
+- RLUSD Token: `0xe101FB315a64cDa9944E570a7bFfaFE60b994b1D`
 
 ## Testing
 
