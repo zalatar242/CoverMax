@@ -76,7 +76,7 @@ Premiums are calculated dynamically based on:
    NETWORK=local
    ```
 
-   For Sepolia testnet (may not work as well):
+   For Sepolia testnet (may not work as well, checkout other branch):
 
    ```
    NETWORK=sepolia
